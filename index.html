@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+<div id="authScreen" class="auth-screen">
+    <section class="auth-card" aria-labelledby="authTitle">
+        <div class="auth-mark" aria-hidden="true">💰</div>
+        <p class="auth-eyebrow">PERSONAL FINANCE, MADE SIMPLE</p>
+        <h1 id="authTitle">Welcome back</h1>
+        <p id="authSubtitle" class="auth-subtitle">Sign in to open your Expense Tracker.</p>
+
+        <div id="authTabs" class="auth-tabs" role="tablist" aria-label="Account access">
+            <button type="button" class="auth-tab active" data-mode="signin" role="tab" aria-selected="true">Sign in</button>
+            <button type="button" class="auth-tab" data-mode="signup" role="tab" aria-selected="false">Create account</button>
+        </div>
+
+        <form id="authForm" class="auth-form">
+            <label for="authEmail">Email address</label>
+            <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email" required>
+
+            <div id="authPasswordGroup">
+                <label for="authPassword">Password</label>
+                <input id="authPassword" type="password" placeholder="At least 6 characters" minlength="6" autocomplete="current-password" required>
+            </div>
+
+            <div id="newPasswordGroup" class="hidden">
+                <label for="newPassword">New password</label>
+                <input id="newPassword" type="password" placeholder="At least 6 characters" minlength="6" autocomplete="new-password">
+            </div>
+
+            <button id="authSubmit" type="submit" class="auth-submit">
+                Sign in <span aria-hidden="true">→</span>
+            </button>
+        </form>
+
+        <button id="forgotPassword" class="text-button" type="button">Forgot password?</button>
+        <button id="backToSignIn" class="text-button hidden" type="button">← Back to sign in</button>
+
+        <p id="authMessage" class="auth-message" role="status" aria-live="polite"></p>
+        <p class="secure-note">Secure sign-in powered by Supabase Auth.</p>
+    </section>
+</div>
+
+<div id="trackerApp" class="container hidden">
+    <div class="user-bar">
+        <span>Signed in as <strong id="signedInEmail"></strong></span>
+        <button id="signOutButton" type="button" class="signout-btn">Sign out</button>
+    </div>
+
+    <header>
+        <h1>💰 Expense Tracker</h1>
+        <p>Manage your personal finances</p>
+    </header>
+
+    <div class="balance-card">
+        <h3>Current Balance</h3>
+        <h2 id="balance">₹0.00</h2>
+    </div>
+
+    <div class="summary">
+        <div class="summary-box income">
+            <span>💵</span>
+            <h3>Total Income</h3>
+            <p id="income">₹0.00</p>
+        </div>
+
+        <div class="summary-box expense">
+            <span>💸</span>
+            <h3>Total Expenses</h3>
+            <p id="expense">₹0.00</p>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div class="chart-card">
+            <h2>📊 Expense Overview</h2>
+            <div class="chart-container">
+                <canvas id="expenseChart"></canvas>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <h2>📁 Categories</h2>
+            <div id="categorySummary">
+                <p class="empty">No expenses yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h2 id="formTitle">➕ Add Transaction</h2>
+
+        <form id="expenseForm">
+            <div class="input-group">
+                <label>Description</label>
+                <input type="text" id="description" placeholder="e.g. Grocery" required>
+            </div>
+
+            <div class="input-group">
+                <label>Amount</label>
+                <input type="number" id="amount" placeholder="Enter amount" min="1" required>
+            </div>
+
+            <div class="input-group">
+                <label>Type</label>
+                <select id="type">
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Category</label>
+                <select id="category">
+                    <option value="Food">Food</option>
+                    <option value="Shopping">Shopping</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Bills">Bills</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Health">Health</option>
+                    <option value="Education">Education</option>
+                    <option value="Salary">Salary</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Date</label>
+                <input type="date" id="transactionDate" required>
+            </div>
+
+            <button type="submit" id="submitButton">Add Transaction</button>
+
+            <button type="button" id="cancelEdit" class="cancel-btn">Cancel</button>
+        </form>
+    </div>
+
+    <div class="filter-section">
+        <h2>🔍 Search &amp; Filter</h2>
+
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="Search transaction...">
+
+            <select id="filterType">
+                <option value="all">All Transactions</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+            </select>
+
+            <select id="filterCategory">
+                <option value="all">All Categories</option>
+                <option value="Food">Food</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Travel">Travel</option>
+                <option value="Bills">Bills</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Health">Health</option>
+                <option value="Education">Education</option>
+                <option value="Salary">Salary</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <div class="history-header">
+            <h2>📋 Transaction History</h2>
+            <button id="clearAll" class="clear-btn">Clear All</button>
+        </div>
+
+        <div id="transactionList" class="transaction-list">
+            <p class="empty">No transactions yet.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Expense Tracker • Personal Finance Manager</p>
+    </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
